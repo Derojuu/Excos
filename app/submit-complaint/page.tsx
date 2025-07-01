@@ -85,61 +85,8 @@ export default function SubmitComplaint() {
       // Add complaint type separately
       formData.append("complaintType", complaintType)
 
-      // Handle evidence file upload to Google Cloud Storage first
-      const evidenceFile = formData.get("evidence") as File
-      let evidenceUrl = null
-
-      if (evidenceFile && evidenceFile.size > 0) {
-        const allowedFileTypes = ["image/jpeg", "image/png", "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]
-        if (!allowedFileTypes.includes(evidenceFile.type)) {
-          toast({
-            title: "Invalid file type",
-            description: "Only JPEG, PNG, PDF, DOC, and DOCX files are allowed.",
-            variant: "destructive",
-          })
-          setIsLoading(false)
-          setIsSubmitting(false)
-          return
-        }
-
-        // Upload evidence file to Google Cloud Storage
-        try {
-          const evidenceFormData = new FormData()
-          evidenceFormData.append("file", evidenceFile)
-
-          const uploadResponse = await fetch("/api/upload?type=evidence", {
-            method: "POST",
-            body: evidenceFormData,
-            credentials: "include",
-          })
-
-          const uploadResult = await uploadResponse.json()
-
-          if (!uploadResponse.ok || !uploadResult.success) {
-            toast({
-              title: "File upload failed",
-              description: uploadResult.message || "Failed to upload evidence file.",
-              variant: "destructive",
-            })
-            setIsLoading(false)
-            setIsSubmitting(false)
-            return
-          }
-
-          evidenceUrl = uploadResult.url
-          console.log("Evidence uploaded successfully:", evidenceUrl)
-        } catch (uploadError) {
-          console.error("Error uploading evidence:", uploadError)
-          toast({
-            title: "Upload error",
-            description: "Failed to upload evidence file. Please try again.",
-            variant: "destructive",
-          })
-          setIsLoading(false)
-          setIsSubmitting(false)
-          return
-        }
-      }
+      // File upload temporarily disabled - no evidence URL for now
+      const evidenceUrl = null
 
       // Remove the evidence file from formData and add the GCS URL instead
       formData.delete("evidence")
@@ -613,60 +560,17 @@ export default function SubmitComplaint() {
                       <Label htmlFor="evidence" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Supporting Evidence
                       </Label>
-                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-purple-400 dark:hover:border-purple-500 transition-colors">
-                        <Upload className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
-                        <Input
-                          id="evidence"
-                          name="evidence"
-                          type="file"
-                          accept=".jpg,.jpeg,.png,.pdf"
-                          className="hidden"
-                          onChange={handleFileChange}
-                        />
-                        <Label htmlFor="evidence" className="cursor-pointer">
-                          <span className="text-sm text-gray-600 dark:text-gray-400">
-                            Click to upload or drag and drop
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center bg-gray-50 dark:bg-gray-800/30">
+                        <Upload className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2 opacity-50" />
+                        <div className="text-center">
+                          <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                            File Upload Not Available for Now
                           </span>
                           <br />
-                          <span className="text-xs text-gray-500 dark:text-gray-500">
-                            JPEG, PNG, or PDF files only (Max 10MB)
+                          <span className="text-xs text-gray-400 dark:text-gray-500">
+                            Stay tuned for this feature
                           </span>
-                        </Label>
-
-                        {/* Preview Section */}
-                        {filePreview && (
-                          <div className="mt-4 p-4 bg-white/50 dark:bg-gray-800/50 rounded-lg">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                {filePreview.name}
-                              </span>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setFilePreview(null)}
-                                className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                              >
-                                Remove
-                              </Button>
-                            </div>
-                            {filePreview.type.startsWith("image/") ? (
-                              <div className="relative h-48 w-full">
-                                <Image
-                                  src={filePreview.url || "/placeholder.svg"}
-                                  alt="Preview"
-                                  fill
-                                  className="object-contain rounded-lg"
-                                />
-                              </div>
-                            ) : (
-                              <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-                                <FileText className="w-5 h-5" />
-                                <span>PDF Document</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
+                        </div>
                       </div>
                       {state.errors?.evidenceFile && (
                         <p className="text-sm text-red-500 dark:text-red-400 flex items-center">

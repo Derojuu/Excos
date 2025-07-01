@@ -78,8 +78,10 @@ export default function Register() {
 
     if (!formData.password) {
       newErrors.password = "Password is required"
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters"
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters"
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+      newErrors.password = "Password must contain at least one uppercase letter, one lowercase letter, and one number"
     }
 
     if (formData.password !== formData.confirmPassword) {
@@ -104,20 +106,25 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    
+    // Validate form before proceeding
+    if (!validateForm()) {
+      return
+    }
+    
     setIsLoading(true)
 
     try {
-      const formData = new FormData(e.currentTarget)
       const data = {
-        firstName: formData.get("firstName"),
-        lastName: formData.get("lastName"),
-        email: formData.get("email"),
-        password: formData.get("password"),
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
         role: "student",
-        studentId: formData.get("studentId"),
-        department: formData.get("department"),
-        faculty: formData.get("faculty"),
-        level: formData.get("level"),
+        studentId: formData.studentId,
+        department: formData.department,
+        faculty: formData.faculty,
+        level: formData.level,
       }
 
       const response = await fetch("/api/auth/register", {

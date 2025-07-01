@@ -21,21 +21,34 @@ export async function registerAdmin(data: {
   try {
     const db = await getDb()
 
-    // Check if admin already exists
-    const [rows] = await db.execute(
+    // Check if admin already exists (email or staffId)
+    const [emailRows] = await db.execute(
       "SELECT id FROM users WHERE email = ? AND role = 'admin'",
       [data.email]
     )
 
-    if (Array.isArray(rows) && rows.length > 0) {
+    if (Array.isArray(emailRows) && emailRows.length > 0) {
       return {
         success: false,
         message: "An admin with this email already exists.",
       }
     }
 
+    // Check if staffId already exists
+    const [staffRows] = await db.execute(
+      "SELECT id FROM users WHERE staffId = ?",
+      [data.staffId]
+    )
+
+    if (Array.isArray(staffRows) && staffRows.length > 0) {
+      return {
+        success: false,
+        message: "An admin with this Staff ID already exists.",
+      }
+    }
+
     const adminId = generateId()
-    const hashedPassword = await hashPassword(data.password)
+    const hashedPassword = await bcryptjs.hash(data.password, 10)
 
     await db.execute(`
       INSERT INTO users (
@@ -89,7 +102,6 @@ export async function registerStudent(data: {
   try {
     const db = await getDb()
     const hashedPassword = await bcryptjs.hash(data.password, 10)
-    console.log("Hashed password during registration:", hashedPassword)
 
     // Check if email or studentId already exists
     const [rows] = await db.execute(
