@@ -1,6 +1,5 @@
 "use client"
 
-import Loading from "./loading"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
@@ -424,7 +423,7 @@ export default function ComplaintDetail() {
                                 <div className="min-w-0">
                                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Level</p>
                                   <p className="text-gray-900 dark:text-gray-100 break-words">
-                                    {complaint.userLevel || 'Not specified'}
+                                    {complaint.level || 'Not specified'}
                                   </p>
                                 </div>
                               </div>

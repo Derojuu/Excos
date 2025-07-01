@@ -58,9 +58,9 @@ export default function SubmissionSuccess() {
         <CardContent className="text-center space-y-4">
           <p className="text-gray-600">Your exam complaint has been submitted successfully.</p>
 
-          <div className="bg-gray-50 p-4 rounded-md">
-            <p className="text-sm text-gray-500 mb-1">Your complaint reference number is:</p>
-            <p className="text-xl font-mono font-medium">{referenceNumber}</p>
+          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Your complaint reference number is:</p>
+            <p className="text-xl font-mono font-medium text-gray-900 dark:text-gray-100">{referenceNumber}</p>
           </div>
 
           <p className="text-sm text-gray-500">
