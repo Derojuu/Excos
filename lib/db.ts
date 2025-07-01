@@ -9,50 +9,62 @@ const config = {
   password: process.env.MYSQLPASSWORD,
   database: process.env.MYSQLDATABASE,
   port: parseInt(process.env.MYSQLPORT || '3306'),
-  // Valid mysql2 pool options only
   waitForConnections: true,
-  connectionLimit: 10, // Reduced for better stability
+  connectionLimit: 10,
   queueLimit: 0,
-  // Remove invalid options: acquireTimeout, timeout, reconnect, idleTimeout, maxIdle
-  // Add valid mysql2 options
-  acquireTimeout: 60000, // This is actually valid for pools
-  timeout: 60000, // This is actually valid for pools
-  reconnect: true, // This is actually valid
-  idleTimeout: 300000, // This is actually valid
-  maxIdle: 5, // Reduced for stability
-  // Add SSL for Railway (required for production)
+  acquireTimeout: 60000,
+  timeout: 60000,
   ssl: {
     rejectUnauthorized: false
   },
-  // Add these for better connection handling
   multipleStatements: false,
-  namedPlaceholders: false,
   typeCast: true,
   supportBigNumbers: true,
-  bigNumberStrings: false,
-  dateStrings: false,
-  debug: false,
-  trace: false,
-  stringifyObjects: false,
   timezone: 'local'
 }
 
 let pool: mysql.Pool | null = null
 let isInitialized = false
 
-// Initialize database tables once when the module loads
+export async function getDb(): Promise<mysql.Pool> {
+  try {
+    if (!pool) {
+      console.log('Creating new MySQL connection pool...');
+      console.log('Connecting to:', process.env.MYSQLHOST);
+      pool = mysql.createPool(config);
+      console.log('MySQL connection pool created successfully!');
+      
+      // Auto-initialize tables on first connection
+      if (!isInitialized) {
+        console.log('Initializing database tables...');
+        await initDb();
+      }
+    }
+    
+    return pool;
+  } catch (error) {
+    console.error('MySQL connection failed:', error);
+    throw error;
+  }
+}
+
+// Initialize database tables
 export async function initDb() {
   if (isInitialized) return;
   
   try {
-    const db = await getDb();
+    if (!pool) {
+      throw new Error('Database pool not initialized');
+    }
+    
+    console.log('Creating database tables...');
     
     // Test connection first
-    await db.execute('SELECT 1');
+    await pool.execute('SELECT 1');
     console.log('Database connection test successful');
     
     // Create users table
-    await db.execute(`
+    await pool.execute(`
       CREATE TABLE IF NOT EXISTS users (
         id VARCHAR(50) PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
@@ -74,9 +86,10 @@ export async function initDb() {
         profilePicUrl VARCHAR(512) NULL
       )
     `);
+    console.log('✅ Users table created');
 
     // Create complaints table
-    await db.execute(`
+    await pool.execute(`
       CREATE TABLE IF NOT EXISTS complaints (
         id VARCHAR(50) PRIMARY KEY,
         referenceNumber VARCHAR(50) UNIQUE NOT NULL,
@@ -100,9 +113,10 @@ export async function initDb() {
         FOREIGN KEY (userId) REFERENCES users(id)
       )
     `);
+    console.log('✅ Complaints table created');
 
     // Create password_reset_tokens table
-    await db.execute(`
+    await pool.execute(`
       CREATE TABLE IF NOT EXISTS password_reset_tokens (
         id VARCHAR(50) PRIMARY KEY,
         userId VARCHAR(50) NOT NULL,
@@ -111,9 +125,10 @@ export async function initDb() {
         expiresAt TIMESTAMP NOT NULL
       )
     `);
+    console.log('✅ Password reset tokens table created');
 
     // Create complaint_status_history table
-    await db.execute(`
+    await pool.execute(`
       CREATE TABLE IF NOT EXISTS complaint_status_history (
         id VARCHAR(50) PRIMARY KEY,
         complaint_id VARCHAR(50) NOT NULL,
@@ -127,9 +142,10 @@ export async function initDb() {
         FOREIGN KEY (changed_by) REFERENCES users(id)
       )
     `);
+    console.log('✅ Complaint status history table created');
 
     // Create responses table
-    await db.execute(`
+    await pool.execute(`
       CREATE TABLE IF NOT EXISTS responses (
         id VARCHAR(50) PRIMARY KEY,
         text TEXT NOT NULL,
@@ -141,9 +157,10 @@ export async function initDb() {
         CONSTRAINT FK_responses_complaints FOREIGN KEY (complaintId) REFERENCES complaints(id)
       )
     `);
+    console.log('✅ Responses table created');
 
     // Create notifications table
-    await db.execute(`
+    await pool.execute(`
       CREATE TABLE IF NOT EXISTS notifications (
         id VARCHAR(50) PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
@@ -159,32 +176,16 @@ export async function initDb() {
         INDEX idx_unread_notifications (userId, isRead)
       )
     `);
+    console.log('✅ Notifications table created');
 
     isInitialized = true;
-    console.log('Database tables initialized successfully');
+    console.log('✅ All database tables initialized successfully');
   } catch (error) {
-    console.error('Database initialization failed:', error);
+    console.error('❌ Database initialization failed:', error);
     throw error;
   }
 }
 
-export async function getDb(): Promise<mysql.Pool> {
-  try {
-    if (!pool) {
-      console.log('Creating new MySQL connection pool...');
-      console.log('Connecting to:', process.env.MYSQLHOST);
-      pool = mysql.createPool(config);
-      console.log('MySQL connection pool created successfully!');
-    }
-    
-    return pool;
-  } catch (error) {
-    console.error('MySQL connection failed:', error);
-    throw error;
-  }
-}
-
-// Function to close the connection pool
 export async function closeDb(): Promise<void> {
   if (pool) {
     await pool.end();
@@ -194,7 +195,6 @@ export async function closeDb(): Promise<void> {
   }
 }
 
-// Function to test database connection
 export async function testConnection(): Promise<boolean> {
   try {
     const db = await getDb();
@@ -207,7 +207,6 @@ export async function testConnection(): Promise<boolean> {
   }
 }
 
-// Function to safely execute queries with connection retry
 export async function executeQuery(query: string, params: any[] = []): Promise<any> {
   let retries = 3;
   
@@ -220,13 +219,11 @@ export async function executeQuery(query: string, params: any[] = []): Promise<a
       retries--;
       console.error(`Query execution failed (${3 - retries}/3):`, error?.message);
       
-      // Handle specific connection errors
       if (error?.code === 'ER_CON_COUNT_ERROR' || 
           error?.code === 'ECONNRESET' ||
           error?.code === 'ETIMEDOUT' ||
           error?.code === 'ENOTFOUND') {
         
-        // Close pool and retry
         if (pool) {
           try {
             await pool.end();
@@ -239,7 +236,7 @@ export async function executeQuery(query: string, params: any[] = []): Promise<a
         
         if (retries > 0) {
           console.log('Retrying query with new connection pool...');
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+          await new Promise(resolve => setTimeout(resolve, 2000));
           continue;
         }
       }
@@ -252,7 +249,6 @@ export async function executeQuery(query: string, params: any[] = []): Promise<a
   throw new Error('Query failed after 3 retries');
 }
 
-// Helper function to generate a unique ID
 export function generateId(): string {
   return (
     Date.now().toString(36) +
@@ -260,7 +256,6 @@ export function generateId(): string {
   );
 }
 
-// Add a helper function for password updates
 export async function updateUserPassword(userId: string, hashedPassword: string): Promise<boolean> {
   try {
     const [result] = await executeQuery(
@@ -279,7 +274,6 @@ export async function updateUserPassword(userId: string, hashedPassword: string)
   }
 }
 
-// Update the verifyUserPassword function
 export async function verifyUserPassword(userId: string, currentPassword: string): Promise<boolean> {
   try {
     const [rows] = await executeQuery(
@@ -298,7 +292,6 @@ export async function verifyUserPassword(userId: string, currentPassword: string
   }
 }
 
-// Function to generate a unique reference number
 export function generateReferenceNumber() {
   return 'REF-' + Math.floor(100000 + Math.random() * 900000);
 }
