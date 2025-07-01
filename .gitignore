@@ -1,0 +1,95 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Database files (if storing locally)
+*.sqlite
+*.sqlite3
+*.db
+
+# Uploaded files/attachments
+/public/uploads/
+/uploads/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# Temporary folders
+tmp/
+temp/
+
+# Coverage reports
+coverage/
+*.lcov
+.nyc_output
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# Lock files (optional - choose based on team preference)
+# package-lock.json
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Sentry Config File
+.sentryclirc
+
+# Local certificate files
+*.pem
+
+# Turborepo
+.turbo
+
+# Google Cloud credentials
+*-key.json
+*-credentials.json
+service-account*.json
+gcp-*.json
+firebase-*.json
+google-cloud-*.json
+
+# AWS credentials
+.aws/
+aws-credentials*
+
+# Other cloud provider credentials
+azure-credentials*
+gcp-credentials*
