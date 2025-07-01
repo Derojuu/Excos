@@ -6,8 +6,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
-
-  try {    // Verify admin authentication
+  try {
+    // Verify admin authentication
     const userId = verifyAdminAuth(req)
     
     if (!userId) {
@@ -16,7 +16,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { startDate, endDate, status, type } = req.query
 
-    const db = await getDb()    // Build base query with filters
+    const db = await getDb()
+
+    // Build base query with filters
     let whereClause = 'WHERE 1=1'
     const params: any[] = []
 
@@ -40,6 +42,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       params.push(type)
     }
 
+    console.log('Analytics query parameters:', { whereClause, params })
+
     // Complaint trends (last 30 days by default)
     const trendQuery = `
       SELECT 
@@ -52,11 +56,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ${whereClause}
       GROUP BY DATE(createdAt)
       ORDER BY date DESC
-      LIMIT 30    `
+      LIMIT 30
+    `
+    
+    console.log('Executing trend query:', trendQuery)
     const [trendRows] = await db.execute(trendQuery, params)
     const trends = trendRows as any[]
-
-    // Complaint types distribution
+    console.log('Trends result:', trends)    // Complaint types distribution
     const typeDistributionQuery = `
       SELECT 
         complaintType as type,
@@ -67,10 +73,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       GROUP BY complaintType
       ORDER BY count DESC
     `
-    // For subqueries, we need to duplicate the parameters
+    // For subqueries, we need to duplicate the parameters for both main query and subquery
     const typeParams = [...params, ...params]
+    console.log('Executing type distribution query:', typeDistributionQuery)
     const [typeRows] = await db.execute(typeDistributionQuery, typeParams)
     const typeDistribution = typeRows as any[]
+    console.log('Type distribution result:', typeDistribution)
 
     // Status distribution
     const statusDistributionQuery = `
@@ -89,21 +97,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           ELSE 4 
         END
     `
-    // For subqueries, we need to duplicate the parameters
+    // For subqueries, we need to duplicate the parameters for both main query and subquery
     const statusParams = [...params, ...params]
+    console.log('Executing status distribution query:', statusDistributionQuery)
     const [statusRows] = await db.execute(statusDistributionQuery, statusParams)
-    const statusDistribution = statusRows as any[]// Average resolution time
+    const statusDistribution = statusRows as any[]
+    console.log('Status distribution result:', statusDistribution)    // Average resolution time
     const resolutionTimeQuery = `
       SELECT 
         AVG(DATEDIFF(updatedAt, createdAt)) as avg_resolution_days,
         MIN(DATEDIFF(updatedAt, createdAt)) as min_resolution_days,
-        MAX(DATEDIFF(updatedAt, createdAt)) as max_resolution_days      FROM complaints 
+        MAX(DATEDIFF(updatedAt, createdAt)) as max_resolution_days
+      FROM complaints 
       ${whereClause} AND status = 'resolved' AND updatedAt IS NOT NULL
     `
     const [resolutionRows] = await db.execute(resolutionTimeQuery, params)
-    const resolutionTimes = (resolutionRows as any[])[0] || { avg_resolution_days: 0, min_resolution_days: 0, max_resolution_days: 0 }
-
-    // Monthly comparison (current month vs previous month)
+    const resolutionTimes = (resolutionRows as any[])[0] || { avg_resolution_days: 0, min_resolution_days: 0, max_resolution_days: 0 }    // Monthly comparison (current month vs previous month)
     const monthlyComparisonQuery = `
       SELECT 
         MONTH(createdAt) as month,
@@ -111,7 +120,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         COUNT(*) as count
       FROM complaints 
       WHERE createdAt >= DATE_SUB(CURDATE(), INTERVAL 2 MONTH)
-      GROUP BY YEAR(createdAt), MONTH(createdAt)      ORDER BY year DESC, month DESC
+      GROUP BY YEAR(createdAt), MONTH(createdAt)
+      ORDER BY year DESC, month DESC
       LIMIT 2
     `
     const [monthlyRows] = await db.execute(monthlyComparisonQuery, [])
@@ -128,9 +138,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ORDER BY hour
     `
     const [hourlyRows] = await db.execute(hourlyDistributionQuery, params)
-    const hourlyDistribution = hourlyRows as any[]
-
-    // Top exam types with most complaints
+    const hourlyDistribution = hourlyRows as any[]    // Top exam types with most complaints
     const topExamTypesQuery = `
       SELECT 
         examName as exam_name,
@@ -150,7 +158,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         COUNT(DISTINCT c.id) as complaints_with_responses,
         COUNT(r.id) as total_responses,
         AVG(DATEDIFF(r.createdAt, c.createdAt)) as avg_first_response_time
-      FROM complaints c      LEFT JOIN responses r ON c.id = r.complaintId
+      FROM complaints c
+      LEFT JOIN responses r ON c.id = r.complaintId
       ${whereClause.replace('WHERE 1=1', 'WHERE c.id IS NOT NULL').replace(/createdAt/g, 'c.createdAt')}
     `
     const [responseRows] = await db.execute(responseStatsQuery, params)
@@ -167,9 +176,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       responseStats,
       summary: {
         totalComplaints: trends.reduce((sum: number, day: any) => sum + (day.count || 0), 0),
-        avgDailyComplaints: trends.length > 0 ? parseFloat((trends.reduce((sum: number, day: any) => sum + (day.count || 0), 0) / trends.length).toFixed(1)) : 0,
-        resolutionRate: parseFloat(statusDistribution.find((s: any) => s.status === 'resolved')?.percentage || 0),
-        pendingRate: parseFloat(statusDistribution.find((s: any) => s.status === 'pending')?.percentage || 0)
+        avgDailyComplaints: trends.length > 0 ? parseFloat((trends.reduce((sum: number, day: any) => sum + (day.count || 0), 0) / trends.length).toFixed(1)).toString() : "0",
+        resolutionRate: parseFloat((statusDistribution.find((s: any) => s.status === 'resolved')?.percentage || 0).toString()),
+        pendingRate: parseFloat((statusDistribution.find((s: any) => s.status === 'pending')?.percentage || 0).toString())
       }
     }
 
