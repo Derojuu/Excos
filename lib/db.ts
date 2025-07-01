@@ -4,19 +4,37 @@ import bcrypt from "bcryptjs"
 dotenvConfig()
 
 const config = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || 'excos',
-  port: parseInt(process.env.DB_PORT || '3306'),
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
+  port: parseInt(process.env.MYSQLPORT || '3306'),
+  // Valid mysql2 pool options only
   waitForConnections: true,
-  connectionLimit: 50, // Increased from 10 to 50
+  connectionLimit: 10, // Reduced for better stability
   queueLimit: 0,
-  acquireTimeout: 60000, // 60 seconds timeout
-  timeout: 60000, // 60 seconds query timeout
-  reconnect: true,
-  idleTimeout: 300000, // 5 minutes idle timeout
-  maxIdle: 10, // Maximum idle connections
+  // Remove invalid options: acquireTimeout, timeout, reconnect, idleTimeout, maxIdle
+  // Add valid mysql2 options
+  acquireTimeout: 60000, // This is actually valid for pools
+  timeout: 60000, // This is actually valid for pools
+  reconnect: true, // This is actually valid
+  idleTimeout: 300000, // This is actually valid
+  maxIdle: 5, // Reduced for stability
+  // Add SSL for Railway (required for production)
+  ssl: {
+    rejectUnauthorized: false
+  },
+  // Add these for better connection handling
+  multipleStatements: false,
+  namedPlaceholders: false,
+  typeCast: true,
+  supportBigNumbers: true,
+  bigNumberStrings: false,
+  dateStrings: false,
+  debug: false,
+  trace: false,
+  stringifyObjects: false,
+  timezone: 'local'
 }
 
 let pool: mysql.Pool | null = null
@@ -28,6 +46,10 @@ export async function initDb() {
   
   try {
     const db = await getDb();
+    
+    // Test connection first
+    await db.execute('SELECT 1');
+    console.log('Database connection test successful');
     
     // Create users table
     await db.execute(`
@@ -142,6 +164,7 @@ export async function initDb() {
     console.log('Database tables initialized successfully');
   } catch (error) {
     console.error('Database initialization failed:', error);
+    throw error;
   }
 }
 
@@ -149,6 +172,7 @@ export async function getDb(): Promise<mysql.Pool> {
   try {
     if (!pool) {
       console.log('Creating new MySQL connection pool...');
+      console.log('Connecting to:', process.env.MYSQLHOST);
       pool = mysql.createPool(config);
       console.log('MySQL connection pool created successfully!');
     }
@@ -175,6 +199,7 @@ export async function testConnection(): Promise<boolean> {
   try {
     const db = await getDb();
     await db.execute('SELECT 1');
+    console.log('Database connection test successful');
     return true;
   } catch (error) {
     console.error('Database connection test failed:', error);
@@ -189,29 +214,42 @@ export async function executeQuery(query: string, params: any[] = []): Promise<a
   while (retries > 0) {
     try {
       const db = await getDb();
-      return await db.execute(query, params); // Ensure we return the awaited result
+      const result = await db.execute(query, params);
+      return result;
     } catch (error: any) {
       retries--;
       console.error(`Query execution failed (${3 - retries}/3):`, error?.message);
       
-      if (error?.code === 'ER_CON_COUNT_ERROR' || error?.code === 'ECONNRESET') {
-        // Connection issues - close pool and retry
+      // Handle specific connection errors
+      if (error?.code === 'ER_CON_COUNT_ERROR' || 
+          error?.code === 'ECONNRESET' ||
+          error?.code === 'ETIMEDOUT' ||
+          error?.code === 'ENOTFOUND') {
+        
+        // Close pool and retry
         if (pool) {
-          await pool.end();
+          try {
+            await pool.end();
+          } catch (e) {
+            console.log('Error closing pool:', e);
+          }
           pool = null;
           isInitialized = false;
         }
         
         if (retries > 0) {
           console.log('Retrying query with new connection pool...');
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
           continue;
         }
       }
-      throw error; // Always throw after handling
+      
+      if (retries === 0) {
+        throw error;
+      }
     }
   }
-  throw new Error('Query failed after 3 retries'); // Ensure error is thrown if all retries fail
+  throw new Error('Query failed after 3 retries');
 }
 
 // Helper function to generate a unique ID
@@ -225,8 +263,7 @@ export function generateId(): string {
 // Add a helper function for password updates
 export async function updateUserPassword(userId: string, hashedPassword: string): Promise<boolean> {
   try {
-    const pool = await getDb();
-    const [result] = await pool.execute(
+    const [result] = await executeQuery(
       `UPDATE users 
        SET password = ?, 
            passwordUpdatedAt = NOW(),
@@ -245,8 +282,7 @@ export async function updateUserPassword(userId: string, hashedPassword: string)
 // Update the verifyUserPassword function
 export async function verifyUserPassword(userId: string, currentPassword: string): Promise<boolean> {
   try {
-    const pool = await getDb();
-    const [rows] = await pool.execute(
+    const [rows] = await executeQuery(
       `SELECT password FROM users WHERE id = ?`,
       [userId]
     );
