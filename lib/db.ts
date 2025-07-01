@@ -4,11 +4,11 @@ import bcrypt from "bcryptjs"
 dotenvConfig()
 
 const config = {
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-  port: parseInt(process.env.MYSQLPORT || '3306'),
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME || 'excos',
+  port: parseInt(process.env.DB_PORT || '3306'),
   waitForConnections: true,
   connectionLimit: 50, // Increased from 10 to 50
   queueLimit: 0,
@@ -17,8 +17,6 @@ const config = {
   reconnect: true,
   idleTimeout: 300000, // 5 minutes idle timeout
   maxIdle: 10, // Maximum idle connections
-  // Add SSL for Railway production
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
 }
 
 let pool: mysql.Pool | null = null
@@ -191,7 +189,7 @@ export async function executeQuery(query: string, params: any[] = []): Promise<a
   while (retries > 0) {
     try {
       const db = await getDb();
-      return await db.execute(query, params);
+      return await db.execute(query, params); // Ensure we return the awaited result
     } catch (error: any) {
       retries--;
       console.error(`Query execution failed (${3 - retries}/3):`, error?.message);
@@ -206,14 +204,14 @@ export async function executeQuery(query: string, params: any[] = []): Promise<a
         
         if (retries > 0) {
           console.log('Retrying query with new connection pool...');
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
           continue;
         }
       }
-      throw error;
+      throw error; // Always throw after handling
     }
   }
-  throw new Error('Query failed after 3 retries');
+  throw new Error('Query failed after 3 retries'); // Ensure error is thrown if all retries fail
 }
 
 // Helper function to generate a unique ID
