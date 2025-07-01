@@ -128,10 +128,14 @@ export default function AdminRegister() {
 
       if (result.success) {
         toast({
-          title: "Registration successful!",
-          description: "You can now login with your credentials",
+          title: "✅ Admin Registration Successful!",
+          description: "Welcome to the admin panel! Your administrator account has been created successfully. You can now log in with your credentials.",
+          duration: 5000,
         })
-        router.push("/login")
+        // Wait a moment to show the success message before redirecting
+        setTimeout(() => {
+          router.push("/login")
+        }, 2000)
       } else {
         throw new Error(result.message || "Registration failed")
       }

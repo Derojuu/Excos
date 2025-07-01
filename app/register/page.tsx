@@ -132,11 +132,14 @@ export default function Register() {
 
       if (response.ok) {
         toast({
-          title: "Registration successful!",
-          description: "You can now log in with your credentials.",
+          title: "✅ Registration Successful!",
+          description: "Welcome! Your student account has been created successfully. You can now log in with your credentials.",
+          duration: 5000,
         })
-        router.push("/login")
-        // Do NOT setIsLoading(false) here, let the overlay stay until navigation
+        // Wait a moment to show the success message before redirecting
+        setTimeout(() => {
+          router.push("/login")
+        }, 2000)
       } else {
         toast({
           title: "Registration failed",

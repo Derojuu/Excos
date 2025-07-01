@@ -137,7 +137,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           console.error("Form parsing error:", err);          return res.status(500).json({ message: "Error processing the form." });
         }
 
-        console.log("Authenticated user:", session);const validatedFields = {
+        console.log("Authenticated user:", session);        const validatedFields = {
           fullName: fields.fullName ? fields.fullName[0] : '',
           studentId: fields.studentId ? fields.studentId[0] : '',
           email: fields.email ? fields.email[0] : '',
@@ -150,6 +150,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           course: fields.course ? fields.course[0] : '',
           department: fields.department ? fields.department[0] : '',
           faculty: fields.faculty ? fields.faculty[0] : '',
+          evidenceUrl: fields.evidenceUrl ? fields.evidenceUrl[0] : '',
         };
 
         const validationResult = ComplaintSchema.safeParse(validatedFields);

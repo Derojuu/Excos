@@ -39,15 +39,16 @@ export async function registerAdmin(data: {
 
     await db.execute(`
       INSERT INTO users (
-        id, email, password, firstName, lastName, 
+        id, email, password, firstName, lastName, staffId,
         position, department, faculty, courses, role
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       adminId,
       data.email,
       hashedPassword,
       data.firstName,
       data.lastName,
+      data.staffId,
       data.position || null,
       data.department || null,
       data.faculty || null,
