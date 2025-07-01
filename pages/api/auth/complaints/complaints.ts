@@ -1,8 +1,6 @@
 import { generateId, generateReferenceNumber, executeQuery } from "@/lib/db";
 import { NextApiRequest, NextApiResponse } from "next";
 import { IncomingForm } from "formidable";
-import fs from "fs";
-import path from "path";
 import { z } from "zod";
 import { getSessionFromRequest } from "@/lib/auth";
 
@@ -94,50 +92,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error("Error fetching complaints:", error);
         return res.status(500).json({ message: "Failed to fetch complaints" });
       }
-    }
-
-    // Handle POST request for creating complaints
+    }    // Handle POST request for creating complaints
     if (req.method === "POST") {
       console.log("POST request received. Processing complaint...");
 
-      const uploadsDir = ensureUploadsDir();
-
+      // Since file upload is disabled, handle as JSON request
       const form = new IncomingForm({
-        uploadDir: uploadsDir,
-        keepExtensions: true,
-      });
-
-      form.on("fileBegin", (name, file) => {
-        const allowedFileTypes = [".jpg", ".jpeg", ".png", ".pdf"];
-        const ext = path.extname(file.originalFilename || "").toLowerCase();
-        console.log("File extension:", ext);
-        console.log(`Received file: ${file.originalFilename}, Type: ${ext}`);
-
-        if (file && !allowedFileTypes.includes(ext)) {
-          return res.status(400).json({ message: "Invalid file type." });
-        }
-
-        file.filepath = path.join(uploadsDir, file.originalFilename || "");
-      });
-
-      form.on("file", async (name, file) => {
-        try {
-          const newFilePath = path.join(uploadsDir, `${Date.now()}-${file.originalFilename}`);
-          console.log("Renaming file:", file.filepath, "->", newFilePath);
-          await fs.promises.rename(file.filepath, newFilePath);
-          file.filepath = newFilePath;
-        } catch (err) {
-          console.error("Error renaming file:", err);
-          res.status(500).json({ message: "Failed to rename file." });
-        }
+        maxFileSize: 0, // Disable file uploads
       });
 
       form.parse(req, async (err, fields, files) => {
         if (err) {
-          console.error("Form parsing error:", err);          return res.status(500).json({ message: "Error processing the form." });
+          console.error("Form parsing error:", err);
+          return res.status(500).json({ message: "Error processing the form." });
         }
 
-        console.log("Authenticated user:", session);        const validatedFields = {
+        console.log("Authenticated user:", session);
+
+        const validatedFields = {
           fullName: fields.fullName ? fields.fullName[0] : '',
           studentId: fields.studentId ? fields.studentId[0] : '',
           email: fields.email ? fields.email[0] : '',
@@ -150,7 +122,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           course: fields.course ? fields.course[0] : '',
           department: fields.department ? fields.department[0] : '',
           faculty: fields.faculty ? fields.faculty[0] : '',
-          evidenceUrl: fields.evidenceUrl ? fields.evidenceUrl[0] : '',
+          evidenceUrl: '', // No file upload for now
         };
 
         const validationResult = ComplaintSchema.safeParse(validatedFields);
@@ -170,11 +142,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           course,
           department,
           faculty,
-          evidenceUrl,
-        } = validationResult.data;
+          evidenceUrl,        } = validationResult.data;
 
-        // Use evidenceUrl from form data (uploaded to GCS) instead of file upload
-        const evidenceFile = evidenceUrl || null;        try {
+        // No file upload for now - evidence is disabled
+        const evidenceFile = null;try {
           console.log("Database connected successfully.");
 
           const complaintId = generateId();
@@ -217,17 +188,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } else if (req.method !== "GET") {
       console.log("Invalid HTTP method:", req.method);
       return res.status(405).json({ message: "Method not allowed." });
-    }
-  } catch (err) {
+    }  } catch (err) {
     console.error("Error decoding or parsing session cookie:", err);
     return res.status(400).json({ message: "Invalid session cookie format." });
   }
-}
-
-function ensureUploadsDir(): string {
-  const uploadsDir = path.join(process.cwd(), "public/uploads");
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-    console.log("Uploads directory created:", uploadsDir);  }
-  return uploadsDir;
 }

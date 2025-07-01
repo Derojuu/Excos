@@ -141,12 +141,12 @@ export default function Register() {
         toast({
           title: "✅ Registration Successful!",
           description: "Welcome! Your student account has been created successfully. You can now log in with your credentials.",
-          duration: 5000,
+          duration: 8000,
         })
-        // Wait a moment to show the success message before redirecting
+        // Wait longer to show the success message before redirecting
         setTimeout(() => {
           router.push("/login")
-        }, 2000)
+        }, 4000)
       } else {
         toast({
           title: "Registration failed",

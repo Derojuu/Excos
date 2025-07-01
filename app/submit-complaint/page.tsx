@@ -95,6 +95,12 @@ export default function SubmitComplaint() {
       }
 
       try {
+        // Debug: Log form data before sending
+        console.log("Form data being sent:")
+        for (let [key, value] of formData.entries()) {
+          console.log(key, value)
+        }
+        
         const httpResponse = await fetch("/api/auth/complaints/complaints", {
           method: "POST",
           body: formData,
@@ -102,12 +108,18 @@ export default function SubmitComplaint() {
         })
 
         const response = await httpResponse.json()
+        
+        // Debug: Log response
+        console.log("API Response:", response)
+        console.log("HTTP Status:", httpResponse.status)
 
         if (!httpResponse.ok) {
+          console.error("Submission failed:", response)
           toast({
             title: "Submission failed",
-            description: response.message || "Failed to submit complaint.",
+            description: response.message || `Error ${httpResponse.status}: Failed to submit complaint.`,
             variant: "destructive",
+            duration: 8000,
           })
           setIsLoading(false)
           setIsSubmitting(false)
@@ -116,11 +128,14 @@ export default function SubmitComplaint() {
 
         if (response.referenceNumber) {
           toast({
-            title: "Complaint submitted successfully!",
-            description: `Reference ID: ${response.referenceNumber}`,
+            title: "✅ Success!",
+            description: `Complaint submitted! Reference ID: ${response.referenceNumber}`,
+            duration: 8000,
           })
           // Don't set isLoading to false here
-          router.push(`/submission-success?ref=${response.referenceNumber}`)
+          setTimeout(() => {
+            router.push(`/submission-success?ref=${response.referenceNumber}`)
+          }, 3000)
         } else if (response.message) {
           toast({
             title: "Error",
