@@ -69,7 +69,7 @@ export default function SubmissionSuccess() {
           </p>
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/">
+          <Link href="/track-complaint">
             <Button variant="outline">Return to Home</Button>
           </Link>
           <Link href="/track-complaint">
