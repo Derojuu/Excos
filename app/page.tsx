@@ -108,8 +108,8 @@ export default function Home() {
                   <span className="text-gradient block">System</span>
                 </h1>
                 <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-lg">
-                  A modern, efficient platform for submitting and tracking exam complaints with transparency and
-                  accountability.
+                  An Efficient Platform for Submitting and Tracking Exam Complaints with Transparency and
+                  Accountability.
                 </p>
               </div>
 
@@ -379,7 +379,7 @@ export default function Home() {
                 </div>
                 <span className="text-xl font-bold">EXCOS</span>
               </div>
-              <p className="text-gray-400">Modern exam complaint system for transparent and efficient resolution.</p>
+              <p className="text-gray-400">Exam Complaint System for Transparent and Efficient Resolution.</p>
             </div>
 
             <div>
