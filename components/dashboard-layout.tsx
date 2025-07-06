@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { StudentSidebar } from "@/components/student-sidebar"
 import { LoadingOverlay } from "@/components/loading-overlay"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "@/hooks/use-toast"
 
 interface DashboardLayoutProps {
   children: React.ReactNode

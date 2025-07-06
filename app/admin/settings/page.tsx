@@ -1,9 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { AdminSidebar } from "@/components/admin-sidebar"
+import Link from "next/link"
+import { AdminSidebar, AdminSidebarRef } from "@/components/admin-sidebar"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { LoadingOverlay } from "@/components/loading-overlay"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,8 +15,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
+import type { User as UserType } from "@/app/types/index"
 import {
   Settings,
   Plus,
@@ -29,6 +33,10 @@ import {
   Edit3,
   X,
   GripVertical,
+  Menu,
+  LogOut,
+  User,
+  BarChart3,
 } from "lucide-react"
 import {
   getAdminSettings,
@@ -75,6 +83,9 @@ interface NotificationSettings {
 }
 
 export default function AdminSettings() {
+  const router = useRouter()
+  const adminSidebarRef = useRef<AdminSidebarRef>(null)
+  const [user, setUser] = useState<UserType | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [activeTab, setActiveTab] = useState("categories")
@@ -102,10 +113,65 @@ export default function AdminSettings() {
   // Form states
   const [newCategory, setNewCategory] = useState({ name: "", description: "" })
   const [editingCategory, setEditingCategory] = useState<string | null>(null)
-
   useEffect(() => {
-    loadSettings()
-  }, [])
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/auth/check-auth", {
+          credentials: "include",
+        })
+
+        if (!response.ok) {
+          throw new Error("Auth check failed")
+        }
+
+        const data = await response.json()
+
+        if (data.role !== "admin") {
+          router.push("/profile")
+          return
+        }
+
+        setUser(data)
+        loadSettings()
+      } catch (error) {
+        console.error("Auth error:", error)
+        router.push("/login")
+      }
+    }
+
+    checkAuth()
+  }, [router])
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        window.location.href = "/login"
+      } else {
+        toast({
+          title: "Logout failed",
+          description: "An error occurred while logging out",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Logout error:", error)
+      toast({
+        title: "Logout failed",
+        description: "An error occurred while logging out",
+        variant: "destructive",
+      })
+    }
+  }
 
   const loadSettings = async () => {
     try {
@@ -335,21 +401,11 @@ export default function AdminSettings() {
       setSaving(false)
     }
   }
-
   if (loading) {
-    return (
-      <AdminSidebar>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="w-8 h-8 sm:w-12 sm:h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
-            <p className="text-sm sm:text-base text-gray-600">Loading admin settings...</p>
-          </div>
-        </div>
-      </AdminSidebar>
-    )
+    return <LoadingOverlay isLoading={true} message="Loading admin settings..." />
   }  return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20 relative">
-      <AdminSidebar>
+      <AdminSidebar ref={adminSidebarRef}>
         <div />
       </AdminSidebar>
       
@@ -359,45 +415,91 @@ export default function AdminSettings() {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200/20 dark:bg-blue-800/10 rounded-full opacity-40 animate-pulse delay-1000"></div>
       </div>
 
-      <div className="space-y-6 sm:space-y-8 relative z-10 p-4 sm:p-6 lg:p-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6"
-        >
-          <div className="space-y-1 sm:space-y-2">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gradient">System Settings</h1>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-600">
-              Configure system-wide settings and preferences
-            </p>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Badge className="bg-purple-100 text-purple-800 border-purple-200 text-xs sm:text-sm">
-              <Shield className="w-3 h-3 mr-1" />
-              Admin Only
-            </Badge>
+      {/* Header */}
+      <header className="glass-effect border-b border-white/20 dark:border-gray-700/20 sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-2 flex justify-between items-center">
+          <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+            {/* Menu button for mobile and desktop */}
             <Button
-              onClick={loadSettings}
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="text-xs sm:text-sm border-purple-200 text-purple-600 hover:bg-purple-50"
+              className="p-2 hover:bg-purple-100 dark:hover:bg-purple-900/20"
+              onClick={() => adminSidebarRef.current?.toggleSidebar()}
             >
-              <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              Refresh
+              <Menu className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             </Button>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gradient truncate">System Settings</h1>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hidden sm:block">
+                Configure system-wide settings and preferences
+              </p>
+            </div>
           </div>
-        </motion.div>
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+            {user && (
+              <>
+                <ThemeToggle />
+                <Link href={`/admin/analytics`}>
+                  <Button variant="outline" className="border-purple-200 text-purple-600 hover:bg-purple-50 dark:border-purple-700 dark:text-purple-400 dark:hover:bg-purple-900/20 text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4">
+                    <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Analytics</span>
+                  </Button>
+                </Link>
+                <Link href={`/admin/profile`}>
+                  <Button className="btn-gradient shadow-lg text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4">
+                    <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Profile</span>
+                  </Button>
+                </Link>
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20 text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4"
+                >
+                  <LogOut className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Logout</span>
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </header>      {/* Main Content */}
+      <main className="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="space-y-4 sm:space-y-6">
+          {/* Page Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6"
+          >
+            <div className="space-y-1 sm:space-y-2">
+              <Badge className="bg-purple-100 text-purple-800 border-purple-200 text-xs sm:text-sm w-fit">
+                <Shield className="w-3 h-3 mr-1" />
+                Admin Only
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Button
+                onClick={loadSettings}
+                variant="outline"
+                size="sm"
+                className="text-xs sm:text-sm border-purple-200 text-purple-600 hover:bg-purple-50"
+              >
+                <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                Refresh
+              </Button>
+            </div>
+          </motion.div>
 
-        {/* Main Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          <Card className="glass-effect border-0 shadow-xl">
-            <CardHeader className="border-b border-white/20 bg-gradient-to-r from-white/50 to-white/30">
+          {/* Settings Content */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
+            <Card className="glass-effect border-0 shadow-xl">
+              <CardHeader className="border-b border-white/20 bg-gradient-to-r from-white/50 to-white/30">
               <CardTitle className="text-lg sm:text-xl font-semibold">Admin Configuration</CardTitle>
               <CardDescription className="text-sm sm:text-base text-gray-600">
                 Manage system-wide settings that affect all users
@@ -894,13 +996,14 @@ export default function AdminSettings() {
                           Save Notification Settings
                         </>
                       )}
-                    </Button>
-                  </div>
+                    </Button>                  </div>
                 </TabsContent>
               </Tabs>
             </CardContent>
-          </Card>        </motion.div>
-      </div>
+          </Card>
+        </motion.div>
+        </div>
+      </main>
       <Toaster />
     </div>
   )

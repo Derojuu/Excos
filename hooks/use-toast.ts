@@ -164,8 +164,9 @@ function toast({ duration, ...props }: Toast) {
   })
 
   // Auto-dismiss with custom duration
-  if (duration !== 0) {
-    addToRemoveQueue(id, duration)
+  const finalDuration = duration === undefined ? TOAST_REMOVE_DELAY : duration;
+  if (finalDuration > 0) {
+    addToRemoveQueue(id, finalDuration)
   }
 
   return {
