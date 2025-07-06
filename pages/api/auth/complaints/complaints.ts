@@ -47,10 +47,69 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const offset = Math.max(0, parseInt(req.query.offset as string) || 0);
 
         console.log(`Fetching complaints as ${role} with limit:`, limit, "offset:", offset);        if (role === "admin") {
-          // For now, admins can see all complaints since we don't have department filtering in the current schema
-          console.log('Admin fetching all complaints')
-            // Fetch all complaints for admin - use string interpolation for LIMIT/OFFSET to avoid parameter issues
-          const [rows] = await executeQuery(`
+          // Get admin details to determine what complaints they can view
+          const [adminRows] = await executeQuery(`
+            SELECT position, department, faculty FROM users WHERE id = ? AND role = 'admin'
+          `, [userId]);
+
+          if (!Array.isArray(adminRows) || adminRows.length === 0) {
+            return res.status(401).json({ message: "Admin not found" });
+          }
+
+          const admin = adminRows[0] as any;
+          const { position, department, faculty } = admin;
+
+          let whereClause = '';
+          let params: any[] = [];
+
+          // Apply role-based filtering
+          switch (position) {
+            case 'lecturer':
+              // Lecturers view complaints within their department
+              if (department) {
+                whereClause = 'WHERE c.department = ?';
+                params = [department];
+              } else {
+                whereClause = 'WHERE 1=0'; // No complaints if no department
+              }
+              break;
+
+            case 'hod':
+              // HODs view complaints within their department
+              if (department) {
+                whereClause = 'WHERE c.department = ?';
+                params = [department];
+              } else {
+                whereClause = 'WHERE 1=0'; // No complaints if no department
+              }
+              break;
+
+            case 'dean':
+              // Deans view complaints within their faculty
+              if (faculty) {
+                whereClause = 'WHERE c.faculty = ?';
+                params = [faculty];
+              } else {
+                whereClause = 'WHERE 1=0'; // No complaints if no faculty
+              }
+              break;
+
+            case 'system-administrator':
+            case 'admin':
+              // System administrators view all complaints
+              whereClause = '';
+              params = [];
+              break;
+
+            default:
+              // Unknown position - no access
+              whereClause = 'WHERE 1=0';
+              params = [];
+          }
+
+          console.log(`Admin position: ${position}, whereClause: ${whereClause}, params:`, params);
+
+          const query = `
             SELECT 
               c.id,
               c.referenceNumber,
@@ -59,15 +118,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               DATE_FORMAT(c.examDate, '%Y-%m-%d') as examDate,
               DATE_FORMAT(c.createdAt, '%Y-%m-%d %H:%i:%s') as createdAt,
               c.complaintType AS type,
-              c.status
+              c.status,
+              c.department,
+              c.faculty
             FROM complaints c 
-            LEFT JOIN users u ON c.userId = u.id 
+            ${whereClause}
             ORDER BY c.createdAt DESC 
             LIMIT ${limit} OFFSET ${offset}
-          `)
+          `;
 
-          // Return just the array for consistency with student response
-          return res.status(200).json(rows)
+          const [rows] = await executeQuery(query, params);
+          return res.status(200).json(rows);
         } else {
           // Student query remains unchanged
           const query = `            SELECT 

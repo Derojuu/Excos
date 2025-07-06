@@ -2,54 +2,6 @@ import { getDb } from "@/lib/db";
 import { NextApiRequest, NextApiResponse } from "next";
 import { parse } from "cookie"
 
-// Helper function to build role-based WHERE clause for admin filtering
-function buildAdminFilterQuery(position: string, department?: string, faculty?: string, courses?: string) {
-  switch (position) {
-    case 'lecturer':
-      // Lecturers see complaints related to their courses
-      if (courses) {
-        const courseList = courses.split(',').map(course => course.trim()).filter(course => course)
-        if (courseList.length > 0) {
-          const placeholders = courseList.map(() => '?').join(',')
-          return {
-            whereClause: `AND (c.course IN (${placeholders}) OR c.course IS NULL)`,
-            params: courseList
-          }
-        }
-      }
-      return { whereClause: 'AND c.course IS NULL', params: [] }
-    
-    case 'hod':
-      // HODs see complaints related to their department
-      if (department) {
-        return {
-          whereClause: 'AND (c.department = ? OR c.department IS NULL)',
-          params: [department]
-        }
-      }
-      return { whereClause: 'AND c.department IS NULL', params: [] }
-    
-    case 'dean':
-      // Deans see complaints related to their faculty
-      if (faculty) {
-        return {
-          whereClause: 'AND (c.faculty = ? OR c.faculty IS NULL)',
-          params: [faculty]
-        }
-      }
-      return { whereClause: 'AND c.faculty IS NULL', params: [] }
-    
-    case 'admin':
-    case 'system-administrator':
-      // System administrators see all complaints
-      return { whereClause: '', params: [] }
-    
-    default:
-      // Default: no complaints visible
-      return { whereClause: 'AND 1=0', params: [] }
-  }
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {
     return res.status(405).json({ message: "Method not allowed" })
@@ -72,13 +24,63 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { userId, role } = session
     const db = await getDb()
-    const { id } = req.query
-
-    // Role-based access control
+    const { id } = req.query    // Role-based access control
     if (role === "admin") {
-      // Get admin details to determine access permissions      // For now, admin can see all complaints since we don't have department filtering
-      console.log('Admin accessing complaint:', id)
-        const query = `
+      // Get admin details to determine access permissions
+      const [adminRows] = await db.execute(`
+        SELECT position, department, faculty FROM users WHERE id = ? AND role = 'admin'
+      `, [userId]);
+
+      if (!Array.isArray(adminRows) || adminRows.length === 0) {
+        return res.status(401).json({ message: "Admin not found" });
+      }
+
+      const admin = adminRows[0] as any;
+      const { position, department, faculty } = admin;
+
+      // Build access control query based on position
+      let accessWhereClause = '';
+      let accessParams: any[] = [id];
+
+      switch (position) {
+        case 'lecturer':
+          if (department) {
+            accessWhereClause = 'AND c.department = ?';
+            accessParams.push(department);
+          } else {
+            return res.status(403).json({ message: "Access denied: No department assigned" });
+          }
+          break;
+
+        case 'hod':
+          if (department) {
+            accessWhereClause = 'AND c.department = ?';
+            accessParams.push(department);
+          } else {
+            return res.status(403).json({ message: "Access denied: No department assigned" });
+          }
+          break;
+
+        case 'dean':
+          if (faculty) {
+            accessWhereClause = 'AND c.faculty = ?';
+            accessParams.push(faculty);
+          } else {
+            return res.status(403).json({ message: "Access denied: No faculty assigned" });
+          }
+          break;
+
+        case 'system-administrator':
+        case 'admin':
+          // System administrators can access all complaints
+          accessWhereClause = '';
+          break;
+
+        default:
+          return res.status(403).json({ message: "Access denied: Unknown position" });
+      }
+
+      const query = `
         SELECT 
           c.*,
           u.firstName,
@@ -93,14 +95,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           DATE_FORMAT(c.createdAt, '%Y-%m-%d %H:%i:%s') as createdAt
         FROM complaints c
         INNER JOIN users u ON c.userId = u.id
-        WHERE c.id = ?
+        WHERE c.id = ? ${accessWhereClause}
       `
-      
-      const [rows] = await db.execute(query, [id])
+        const [rows] = await db.execute(query, accessParams)
 
       if (!Array.isArray(rows) || rows.length === 0) {
-        return res.status(404).json({ message: "Complaint not found or access denied" })
-      }      const complaint = rows[0] as any
+        return res.status(404).json({ message: "Complaint not found or access denied" });
+      }const complaint = rows[0] as any
 
       // Get responses
       const [responseRows] = await db.execute(`
