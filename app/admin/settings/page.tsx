@@ -497,68 +497,64 @@ export default function AdminSettings() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            <Card className="glass-effect border-0 shadow-xl">
-              <CardHeader className="border-b border-white/20 bg-gradient-to-r from-white/50 to-white/30">
-              <CardTitle className="text-lg sm:text-xl font-semibold">Admin Configuration</CardTitle>
-              <CardDescription className="text-sm sm:text-base text-gray-600">
+          >            <Card className="glass-effect border-0 shadow-xl">
+              <CardHeader className="border-b border-white/20 dark:border-gray-700/20 bg-gradient-to-r from-white/50 to-white/30 dark:from-gray-800/50 dark:to-gray-800/30">
+              <CardTitle className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">Admin Configuration</CardTitle>
+              <CardDescription className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                 Manage system-wide settings that affect all users
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-4 sm:p-6">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-6 sm:mb-8 bg-gray-100/50 p-1 rounded-xl h-auto">
+            <CardContent className="p-4 sm:p-6">              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-6 sm:mb-8 bg-gray-100/50 dark:bg-gray-800/50 p-1 rounded-xl h-auto">
                   <TabsTrigger
                     value="categories"
-                    className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all font-medium text-xs sm:text-sm p-2 sm:p-3"
+                    className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm rounded-lg transition-all font-medium text-xs sm:text-sm p-2 sm:p-3 text-gray-700 dark:text-gray-300 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100"
                   >
                     <FileText className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Categories
                   </TabsTrigger>
                   <TabsTrigger
                     value="workflow"
-                    className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all font-medium text-xs sm:text-sm p-2 sm:p-3"
+                    className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm rounded-lg transition-all font-medium text-xs sm:text-sm p-2 sm:p-3 text-gray-700 dark:text-gray-300 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100"
                   >
                     <Settings className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Workflow
                   </TabsTrigger>
                   <TabsTrigger
                     value="system"
-                    className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all font-medium text-xs sm:text-sm p-2 sm:p-3"
+                    className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm rounded-lg transition-all font-medium text-xs sm:text-sm p-2 sm:p-3 text-gray-700 dark:text-gray-300 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100"
                   >
                     <Database className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     System
                   </TabsTrigger>
                   <TabsTrigger
                     value="notifications"
-                    className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all font-medium text-xs sm:text-sm p-2 sm:p-3"
+                    className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:shadow-sm rounded-lg transition-all font-medium text-xs sm:text-sm p-2 sm:p-3 text-gray-700 dark:text-gray-300 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100"
                   >
                     <Bell className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Notifications
                   </TabsTrigger>
-                </TabsList>
-
-                {/* Complaint Categories Tab */}
-                <TabsContent value="categories" className="space-y-6">
+                </TabsList>{/* Complaint Categories Tab */}
+                <TabsContent value="categories" className="space-y-4 sm:space-y-6">
                   <div className="space-y-1">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">Complaint Categories</h3>
-                    <p className="text-sm text-gray-600">Manage the types of complaints students can submit</p>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Complaint Categories</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Manage the types of complaints students can submit</p>
                   </div>
 
-                  <Separator className="bg-gray-200" />
+                  <Separator className="bg-gray-200 dark:bg-gray-700" />
 
                   {/* Add New Category */}
-                  <Card className="bg-white/50 border border-gray-200">
+                  <Card className="bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
                     <CardHeader className="pb-4">
-                      <CardTitle className="text-base font-semibold flex items-center">
-                        <Plus className="w-4 h-4 mr-2 text-purple-600" />
+                      <CardTitle className="text-base font-semibold flex items-center text-gray-900 dark:text-gray-100">
+                        <Plus className="w-4 h-4 mr-2 text-purple-600 dark:text-purple-400" />
                         Add New Category
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
-                          <Label htmlFor="categoryName" className="text-sm font-medium">
+                          <Label htmlFor="categoryName" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                             Category Name
                           </Label>
                           <Input
@@ -566,11 +562,11 @@ export default function AdminSettings() {
                             value={newCategory.name}
                             onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
                             placeholder="e.g., Academic Issues"
-                            className="h-10 bg-white border-gray-200 focus:border-purple-500 focus:ring-purple-500/20"
+                            className="h-10 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500/20 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="categoryDescription" className="text-sm font-medium">
+                          <Label htmlFor="categoryDescription" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                             Description
                           </Label>
                           <Input
@@ -578,14 +574,14 @@ export default function AdminSettings() {
                             value={newCategory.description}
                             onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
                             placeholder="Brief description of this category"
-                            className="h-10 bg-white border-gray-200 focus:border-purple-500 focus:ring-purple-500/20"
+                            className="h-10 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500/20 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                           />
                         </div>
                       </div>
                       <Button
                         onClick={handleCreateCategory}
                         disabled={saving || !newCategory.name.trim()}
-                        className="btn-gradient"
+                        className="btn-gradient w-full sm:w-auto"
                       >
                         {saving ? (
                           <>
@@ -600,18 +596,16 @@ export default function AdminSettings() {
                         )}
                       </Button>
                     </CardContent>
-                  </Card>
-
-                  {/* Existing Categories */}
+                  </Card>                  {/* Existing Categories */}
                   <div className="space-y-4">
                     {categories.map((category) => (
-                      <Card key={category.id} className="bg-white/50 border border-gray-200">
+                      <Card key={category.id} className="bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
                         <CardContent className="p-4">
                           {editingCategory === category.id ? (
                             <div className="space-y-4">
-                              <div className="grid gap-4 sm:grid-cols-2">
+                              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                                 <div className="space-y-2">
-                                  <Label className="text-sm font-medium">Category Name</Label>
+                                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Category Name</Label>
                                   <Input
                                     value={category.name}
                                     onChange={(e) =>
@@ -621,11 +615,11 @@ export default function AdminSettings() {
                                         ),
                                       )
                                     }
-                                    className="h-10 bg-white border-gray-200 focus:border-purple-500 focus:ring-purple-500/20"
+                                    className="h-10 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500/20 text-gray-900 dark:text-gray-100"
                                   />
                                 </div>
                                 <div className="space-y-2">
-                                  <Label className="text-sm font-medium">Description</Label>
+                                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</Label>
                                   <Input
                                     value={category.description}
                                     onChange={(e) =>
@@ -635,16 +629,16 @@ export default function AdminSettings() {
                                         ),
                                       )
                                     }
-                                    className="h-10 bg-white border-gray-200 focus:border-purple-500 focus:ring-purple-500/20"
+                                    className="h-10 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500/20 text-gray-900 dark:text-gray-100"
                                   />
                                 </div>
                               </div>
-                              <div className="flex gap-2">
+                              <div className="flex flex-col sm:flex-row gap-2">
                                 <Button
                                   onClick={handleUpdateCategories}
                                   disabled={saving}
                                   size="sm"
-                                  className="btn-gradient"
+                                  className="btn-gradient w-full sm:w-auto"
                                 >
                                   <Save className="w-4 h-4 mr-2" />
                                   Save
@@ -653,7 +647,7 @@ export default function AdminSettings() {
                                   onClick={() => setEditingCategory(null)}
                                   variant="outline"
                                   size="sm"
-                                  className="border-gray-200 text-gray-600 hover:bg-gray-50"
+                                  className="border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 w-full sm:w-auto"
                                 >
                                   <X className="w-4 h-4 mr-2" />
                                   Cancel
@@ -661,28 +655,28 @@ export default function AdminSettings() {
                               </div>
                             </div>
                           ) : (
-                            <div className="flex items-center justify-between">
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2">
-                                  <h4 className="font-semibold text-gray-900">{category.name}</h4>
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                              <div className="space-y-1 flex-1 min-w-0">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 truncate">{category.name}</h4>
                                   <Badge
                                     className={
                                       category.isActive
-                                        ? "bg-green-100 text-green-800 border-green-200"
-                                        : "bg-gray-100 text-gray-800 border-gray-200"
+                                        ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700 text-xs w-fit"
+                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600 text-xs w-fit"
                                     }
                                   >
                                     {category.isActive ? "Active" : "Inactive"}
                                   </Badge>
                                 </div>
-                                <p className="text-sm text-gray-600">{category.description}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">{category.description}</p>
                               </div>
-                              <div className="flex gap-2">
+                              <div className="flex gap-2 flex-shrink-0">
                                 <Button
                                   onClick={() => setEditingCategory(category.id)}
                                   variant="outline"
                                   size="sm"
-                                  className="border-purple-200 text-purple-600 hover:bg-purple-50"
+                                  className="border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 h-8 w-8 p-0"
                                 >
                                   <Edit3 className="w-4 h-4" />
                                 </Button>
@@ -690,7 +684,7 @@ export default function AdminSettings() {
                                   onClick={() => handleDeleteCategory(category.id)}
                                   variant="outline"
                                   size="sm"
-                                  className="border-red-200 text-red-600 hover:bg-red-50"
+                                  className="border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 p-0"
                                   disabled={saving}
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -704,56 +698,55 @@ export default function AdminSettings() {
                   </div>
                 </TabsContent>
 
-                {/* Status Workflow Tab */}
-                <TabsContent value="workflow" className="space-y-6">
+                {/* Status Workflow Tab */}                <TabsContent value="workflow" className="space-y-4 sm:space-y-6">
                   <div className="space-y-1">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">Status Workflow</h3>
-                    <p className="text-sm text-gray-600">Configure the complaint status progression</p>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Status Workflow</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Configure the complaint status progression</p>
                   </div>
 
-                  <Separator className="bg-gray-200" />
+                  <Separator className="bg-gray-200 dark:bg-gray-700" />
 
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {statuses
                       .sort((a, b) => a.order - b.order)
                       .map((status) => (
-                        <Card key={status.id} className="bg-white/50 border border-gray-200">
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2">
-                                  <GripVertical className="w-4 h-4 text-gray-400" />
-                                  <span className="text-sm font-medium text-gray-500">#{status.order}</span>
+                        <Card key={status.id} className="bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+                          <CardContent className="p-3 sm:p-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+                              <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  <GripVertical className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">#{status.order}</span>
                                 </div>
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                                   <div
-                                    className={`w-3 h-3 rounded-full bg-${status.color}-500`}
+                                    className={`w-3 h-3 rounded-full bg-${status.color}-500 flex-shrink-0`}
                                     style={{ backgroundColor: `var(--${status.color}-500)` }}
                                   ></div>
-                                  <h4 className="font-semibold text-gray-900">{status.name}</h4>
+                                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 truncate">{status.name}</h4>
                                   <Badge
                                     className={
                                       status.isActive
-                                        ? "bg-green-100 text-green-800 border-green-200"
-                                        : "bg-gray-100 text-gray-800 border-gray-200"
+                                        ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700 text-xs"
+                                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600 text-xs"
                                     }
                                   >
                                     {status.isActive ? "Active" : "Inactive"}
                                   </Badge>
                                 </div>
                               </div>
-                              <div className="flex gap-2">
+                              <div className="flex gap-2 flex-shrink-0">
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="border-purple-200 text-purple-600 hover:bg-purple-50"
+                                  className="border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 h-8 w-8 p-0"
                                 >
                                   <Edit3 className="w-4 h-4" />
                                 </Button>
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="border-red-200 text-red-600 hover:bg-red-50"
+                                  className="border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 p-0"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
@@ -763,76 +756,80 @@ export default function AdminSettings() {
                         </Card>
                       ))}
                   </div>
-                </TabsContent>
-
-                {/* System Settings Tab */}
-                <TabsContent value="system" className="space-y-6">
+                </TabsContent>                {/* System Settings Tab */}
+                <TabsContent value="system" className="space-y-4 sm:space-y-6">
                   <div className="space-y-1">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">System Configuration</h3>
-                    <p className="text-sm text-gray-600">Configure general system behavior and limits</p>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">System Configuration</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Configure general system behavior and limits</p>
                   </div>
 
-                  <Separator className="bg-gray-200" />
+                  <Separator className="bg-gray-200 dark:bg-gray-700" />
 
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     {/* General Settings */}
-                    <Card className="bg-white/50 border border-gray-200">
+                    <Card className="bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
                       <CardHeader>
-                        <CardTitle className="text-base font-semibold">General Settings</CardTitle>
+                        <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">General Settings</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-1">
-                            <Label className="text-sm font-medium">Auto-assign complaints</Label>
-                            <p className="text-xs text-gray-600">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                          <div className="space-y-1 flex-1">
+                            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Auto-assign complaints</Label>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
                               Automatically assign new complaints to available admins
                             </p>
                           </div>
-                          <Switch
-                            checked={systemSettings.autoAssignment}
-                            onCheckedChange={(checked) =>
-                              setSystemSettings({ ...systemSettings, autoAssignment: checked })
-                            }
-                          />
+                          <div className="flex-shrink-0">
+                            <Switch
+                              checked={systemSettings.autoAssignment}
+                              onCheckedChange={(checked) =>
+                                setSystemSettings({ ...systemSettings, autoAssignment: checked })
+                              }
+                            />
+                          </div>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-1">
-                            <Label className="text-sm font-medium">Require admin approval</Label>
-                            <p className="text-xs text-gray-600">New student accounts require admin approval</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                          <div className="space-y-1 flex-1">
+                            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Require admin approval</Label>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">New student accounts require admin approval</p>
                           </div>
-                          <Switch
-                            checked={systemSettings.requireApproval}
-                            onCheckedChange={(checked) =>
-                              setSystemSettings({ ...systemSettings, requireApproval: checked })
-                            }
-                          />
+                          <div className="flex-shrink-0">
+                            <Switch
+                              checked={systemSettings.requireApproval}
+                              onCheckedChange={(checked) =>
+                                setSystemSettings({ ...systemSettings, requireApproval: checked })
+                              }
+                            />
+                          </div>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-1">
-                            <Label className="text-sm font-medium">Enable notifications</Label>
-                            <p className="text-xs text-gray-600">Send email and SMS notifications to users</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                          <div className="space-y-1 flex-1">
+                            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Enable notifications</Label>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">Send email and SMS notifications to users</p>
                           </div>
-                          <Switch
-                            checked={systemSettings.enableNotifications}
-                            onCheckedChange={(checked) =>
-                              setSystemSettings({ ...systemSettings, enableNotifications: checked })
-                            }
-                          />
+                          <div className="flex-shrink-0">
+                            <Switch
+                              checked={systemSettings.enableNotifications}
+                              onCheckedChange={(checked) =>
+                                setSystemSettings({ ...systemSettings, enableNotifications: checked })
+                              }
+                            />
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
 
                     {/* Security Settings */}
-                    <Card className="bg-white/50 border border-gray-200">
+                    <Card className="bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
                       <CardHeader>
-                        <CardTitle className="text-base font-semibold">Security & Limits</CardTitle>
+                        <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">Security & Limits</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                           <div className="space-y-2">
-                            <Label htmlFor="sessionTimeout" className="text-sm font-medium">
+                            <Label htmlFor="sessionTimeout" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                               Session Timeout (minutes)
                             </Label>
                             <Input
@@ -847,12 +844,10 @@ export default function AdminSettings() {
                                   sessionTimeout: Number.parseInt(e.target.value) || 30,
                                 })
                               }
-                              className="h-10 bg-white border-gray-200 focus:border-purple-500 focus:ring-purple-500/20"
+                              className="h-10 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500/20 text-gray-900 dark:text-gray-100"
                             />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="maxFileSize" className="text-sm font-medium">
+                          </div>                          <div className="space-y-2">
+                            <Label htmlFor="maxFileSize" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                               Max File Size (MB)
                             </Label>
                             <Input
@@ -867,14 +862,14 @@ export default function AdminSettings() {
                                   maxFileSize: Number.parseInt(e.target.value) || 10,
                                 })
                               }
-                              className="h-10 bg-white border-gray-200 focus:border-purple-500 focus:ring-purple-500/20"
+                              className="h-10 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500/20 text-gray-900 dark:text-gray-100"
                             />
                           </div>
                         </div>
                       </CardContent>
                     </Card>
 
-                    <Button onClick={handleUpdateSystemSettings} disabled={saving} className="btn-gradient">
+                    <Button onClick={handleUpdateSystemSettings} disabled={saving} className="btn-gradient w-full sm:w-auto">
                       {saving ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
@@ -888,42 +883,48 @@ export default function AdminSettings() {
                       )}
                     </Button>
                   </div>
-                </TabsContent>
-
-                {/* Notifications Tab */}
-                <TabsContent value="notifications" className="space-y-6">
+                </TabsContent>                {/* Notifications Tab */}
+                <TabsContent value="notifications" className="space-y-4 sm:space-y-6">
                   <div className="space-y-1">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">Notification Settings</h3>
-                    <p className="text-sm text-gray-600">Configure how and when notifications are sent</p>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">Notification Settings</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Configure how and when notifications are sent</p>
                   </div>
 
-                  <Separator className="bg-gray-200" />
+                  <Separator className="bg-gray-200 dark:bg-gray-700" />
 
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     {/* Email Settings */}
-                    <Card className="bg-white/50 border border-gray-200">
+                    <Card className="bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
                       <CardHeader>
-                        <CardTitle className="text-base font-semibold flex items-center">
-                          <Mail className="w-4 h-4 mr-2 text-blue-600" />
+                        <CardTitle className="text-base font-semibold flex items-center text-gray-900 dark:text-gray-100">
+                          <Mail className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
                           Email Configuration
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-1">
-                            <Label className="text-sm font-medium">Enable email notifications</Label>
-                            <p className="text-xs text-gray-600">Send notifications via email</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                          <div className="space-y-1 flex-1">
+                            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Enable email notifications</Label>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">Send notifications via email</p>
                           </div>
-                          <Switch
-                            checked={notificationSettings.emailEnabled}
-                            onCheckedChange={(checked) =>
-                              setNotificationSettings({ ...notificationSettings, emailEnabled: checked })
-                            }
-                          />
+                          <div className="flex-shrink-0">
+                            <Switch
+                              checked={notificationSettings.emailEnabled}
+                              onCheckedChange={(checked) =>
+                                setNotificationSettings({ ...notificationSettings, emailEnabled: checked })
+                              }
+                            />
+                          </div>
                         </div>
 
                         <div className="flex gap-2">
-                          <Button onClick={handleTestEmail} disabled={saving} variant="outline" size="sm">
+                          <Button 
+                            onClick={handleTestEmail} 
+                            disabled={saving} 
+                            variant="outline" 
+                            size="sm"
+                            className="border-blue-200 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                          >
                             <Mail className="w-4 h-4 mr-2" />
                             Send Test Email
                           </Button>
@@ -932,17 +933,17 @@ export default function AdminSettings() {
                     </Card>
 
                     {/* Timing Settings */}
-                    <Card className="bg-white/50 border border-gray-200">
+                    <Card className="bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
                       <CardHeader>
-                        <CardTitle className="text-base font-semibold flex items-center">
-                          <Clock className="w-4 h-4 mr-2 text-orange-600" />
+                        <CardTitle className="text-base font-semibold flex items-center text-gray-900 dark:text-gray-100">
+                          <Clock className="w-4 h-4 mr-2 text-orange-600 dark:text-orange-400" />
                           Timing Configuration
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
                           <div className="space-y-2">
-                            <Label htmlFor="escalationTime" className="text-sm font-medium">
+                            <Label htmlFor="escalationTime" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                               Escalation Time (hours)
                             </Label>
                             <Input
@@ -957,12 +958,12 @@ export default function AdminSettings() {
                                   escalationTime: Number.parseInt(e.target.value) || 48,
                                 })
                               }
-                              className="h-10 bg-white border-gray-200 focus:border-purple-500 focus:ring-purple-500/20"
+                              className="h-10 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500/20 text-gray-900 dark:text-gray-100"
                             />
                           </div>
 
                           <div className="space-y-2">
-                            <Label htmlFor="reminderTime" className="text-sm font-medium">
+                            <Label htmlFor="reminderTime" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                               Reminder Time (hours)
                             </Label>
                             <Input
@@ -977,14 +978,14 @@ export default function AdminSettings() {
                                   reminderTime: Number.parseInt(e.target.value) || 24,
                                 })
                               }
-                              className="h-10 bg-white border-gray-200 focus:border-purple-500 focus:ring-purple-500/20"
+                              className="h-10 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500/20 text-gray-900 dark:text-gray-100"
                             />
                           </div>
                         </div>
                       </CardContent>
                     </Card>
 
-                    <Button onClick={handleUpdateNotificationSettings} disabled={saving} className="btn-gradient">
+                    <Button onClick={handleUpdateNotificationSettings} disabled={saving} className="btn-gradient w-full sm:w-auto">
                       {saving ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
@@ -996,7 +997,7 @@ export default function AdminSettings() {
                           Save Notification Settings
                         </>
                       )}
-                    </Button>                  </div>
+                    </Button></div>
                 </TabsContent>
               </Tabs>
             </CardContent>
