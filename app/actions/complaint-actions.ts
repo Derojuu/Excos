@@ -3,8 +3,6 @@ import { z } from "zod"
 import { getDb, generateId, generateReferenceNumber } from "@/lib/db"
 import bcrypt from "bcryptjs"
 import { revalidatePath } from "next/cache"
-import fs from "fs"
-import path from "path"
 
 // Define validation schema
 const ComplaintSchema = z.object({
@@ -62,26 +60,10 @@ export async function submitComplaint(prevState: ComplaintFormState, formData: F
     evidenceFile: "",
   }
 
-  const evidenceFile = formData.get("evidence") as File
-  if (evidenceFile) {
-    // Define the local directory for storing files
-    const uploadsDir = path.join(process.cwd(), "public/uploads")
-
-    // Ensure the directory exists
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true })
-    }
-
-    // Generate a unique filename
-    const fileName = `${Date.now()}-${evidenceFile.name}`
-    const filePath = path.join(uploadsDir, fileName)
-
-    // Save the file to the local directory
-    const fileBuffer = Buffer.from(await evidenceFile.arrayBuffer())
-    fs.writeFileSync(filePath, fileBuffer)
-
-    // Store the file URL in the database
-    validationData.evidenceFile = `/uploads/${fileName}`
+  // Get evidence URL from Cloudinary upload (if provided)
+  const evidenceUrl = formData.get("evidenceUrl") as string
+  if (evidenceUrl) {
+    validationData.evidenceFile = evidenceUrl
   }
 
   // Validate form data

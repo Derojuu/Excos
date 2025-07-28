@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         bio: null, // This field doesn't exist in DB
         adminLevel: "Standard" // This is a computed field
       })    } else if (req.method === "PUT") {
-      const { firstName, lastName, email, phone, department, position, faculty } = req.body
+      const { firstName, lastName, email, phone, department, position, faculty, profilePicUrl } = req.body
 
       // Validate required fields
       if (!firstName || !lastName || !email) {
@@ -47,9 +47,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
          department = ?,
          position = ?,
          faculty = ?,
+         profilePicUrl = ?,
          updatedAt = NOW() 
          WHERE id = ? AND role = 'admin'`,
-        [firstName, lastName, email, phone, department, position, faculty, session.userId]
+        [firstName, lastName, email, phone, department, position, faculty, profilePicUrl, session.userId]
       )
 
       // Fetch and return the updated user data

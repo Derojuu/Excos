@@ -188,8 +188,7 @@ export default function AdminProfile() {
   }
   const handleSaveProfile = async () => {
     setIsSaving(true)
-    try {
-      // Send all the fields that can be updated in the database
+    try {      // Send all the fields that can be updated in the database
       const updateData = {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -198,6 +197,7 @@ export default function AdminProfile() {
         department: formData.department,
         position: formData.position,
         faculty: formData.faculty,
+        profilePicUrl: formData.profilePicUrl,
       }
 
       const response = await fetch("/api/admin/profile", {

@@ -222,7 +222,10 @@ export default function Profile() {
       await fetch("/api/profile/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData }),
+        body: JSON.stringify({ 
+          id: user?.id,
+          ...formData 
+        }),
       })
       setUser((prev) => prev ? { ...prev, ...formData } : null)
       toast({

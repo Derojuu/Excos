@@ -138,9 +138,17 @@ export const StudentSidebar = forwardRef<StudentSidebarRef, { children: React.Re
           {/* User Info */}
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900 dark:to-blue-900 rounded-xl flex items-center justify-center">
-                <User className="w-7 h-7 text-purple-600 dark:text-purple-300" />
-              </div>
+              {user?.profilePicUrl ? (
+                <img
+                  src={user.profilePicUrl}
+                  alt="Profile"
+                  className="w-12 h-12 rounded-xl object-cover border border-gray-200 dark:border-gray-700"
+                />
+              ) : (
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900 dark:to-blue-900 rounded-xl flex items-center justify-center">
+                  <User className="w-7 h-7 text-purple-600 dark:text-purple-300" />
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
                   {user?.firstName || "Student"}

@@ -120,14 +120,20 @@ export const AdminSidebar = forwardRef<AdminSidebarRef, { children: React.ReactN
                 <X className="h-5 w-5" />
               </Button>
             </div>
-          </div>
-
-          {/* User Info */}
+          </div>          {/* User Info */}
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-xl flex items-center justify-center">
-                <Shield className="w-7 h-7 text-blue-600 dark:text-blue-300" />
-              </div>
+              {user?.profilePicUrl ? (
+                <img
+                  src={user.profilePicUrl}
+                  alt="Profile"
+                  className="w-12 h-12 rounded-xl object-cover border border-gray-200 dark:border-gray-700"
+                />
+              ) : (
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-xl flex items-center justify-center">
+                  <Shield className="w-7 h-7 text-blue-600 dark:text-blue-300" />
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
                   {user?.firstName || "Admin"}

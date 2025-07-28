@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { IncomingForm, File } from 'formidable'
-import { Storage } from '@google-cloud/storage'
+import { uploadFile } from '@/lib/cloudinary'
 import fs from 'fs'
 import path from 'path'
 import { getSessionFromRequest } from '@/lib/auth'
@@ -10,18 +10,6 @@ export const config = {
     bodyParser: false,
   },
 }
-
-// Initialize Google Cloud Storage
-const storage = new Storage({
-  projectId: process.env.GCLOUD_PROJECT_ID || 'fast-ability-462909-u9',
-  credentials: {
-    client_email: process.env.GCLOUD_CLIENT_EMAIL,
-    private_key: process.env.GCLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  },
-})
-
-const bucketName = process.env.GCLOUD_STORAGE_BUCKET || 'excos-bucket'
-const bucket = storage.bucket(bucketName)
 
 interface Session {
   userId: string
@@ -106,61 +94,38 @@ export default async function handler(
         // Verify file was uploaded successfully
         if (!fs.existsSync(file.filepath)) {
           return res.status(500).json({ success: false, message: 'File upload failed' })
-        }
-
-        // Generate unique filename for GCS
+        }        // Generate unique filename for Cloudinary
         const timestamp = Date.now()
         const userId = session.userId
         const ext = path.extname(file.originalFilename || '')
-        const gcsFileName = `${type}/${userId}-${timestamp}${ext}`        // Upload to Google Cloud Storage
-        const fileUpload = bucket.file(gcsFileName)
-        
-        const stream = fileUpload.createWriteStream({
-          metadata: {
-            contentType: file.mimetype || 'application/octet-stream',
-          },
-          // Removed public: true to avoid legacy ACL issues
-        })
+        const folder = type === 'profile' ? 'profile-pics' : 'evidence'        // Read the file buffer
+        const fileBuffer = fs.readFileSync(file.filepath)
 
-        stream.on('error', (error) => {
-          console.error('GCS upload error:', error)
+        try {
+          // Upload to Cloudinary
+          const uploadResult = await uploadFile(fileBuffer, file.originalFilename || 'file', folder) as any
+
           // Clean up temp file
           if (fs.existsSync(file.filepath)) {
             fs.unlinkSync(file.filepath)
           }
-          return res.status(500).json({ success: false, message: 'Failed to upload to cloud storage' })
-        })
-        
-        stream.on('finish', async () => {
-          try {
-            // Generate public URL (file will be accessible based on bucket permissions)
-            const publicUrl = `https://storage.googleapis.com/${bucketName}/${gcsFileName}`
 
-            // Clean up temp file
-            if (fs.existsSync(file.filepath)) {
-              fs.unlinkSync(file.filepath)
-            }
+          console.log(`File uploaded successfully to Cloudinary: ${uploadResult.url}`)
+          
+          res.status(200).json({
+            success: true,
+            url: uploadResult.url,
+            message: 'File uploaded successfully'
+          })
 
-            console.log(`File uploaded successfully to GCS: ${gcsFileName}`)
-            
-            res.status(200).json({
-              success: true,
-              url: publicUrl,
-              message: 'File uploaded successfully'
-            })
-          } catch (publicError) {
-            console.error('Error making file public:', publicError)
-            // Clean up temp file
-            if (fs.existsSync(file.filepath)) {
-              fs.unlinkSync(file.filepath)
-            }
-            return res.status(500).json({ success: false, message: 'Failed to make file public' })
+        } catch (uploadError) {
+          console.error('Cloudinary upload error:', uploadError)
+          // Clean up temp file
+          if (fs.existsSync(file.filepath)) {
+            fs.unlinkSync(file.filepath)
           }
-        })
-
-        // Read temp file and pipe to GCS
-        const readStream = fs.createReadStream(file.filepath)
-        readStream.pipe(stream)
+          return res.status(500).json({ success: false, message: 'Failed to upload to Cloudinary' })
+        }
 
       } catch (error) {
         console.error('Error processing uploaded file:', error)

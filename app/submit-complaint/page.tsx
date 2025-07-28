@@ -85,10 +85,38 @@ export default function SubmitComplaint() {
       // Add complaint type separately
       formData.append("complaintType", complaintType)
 
-      // File upload temporarily disabled - no evidence URL for now
-      const evidenceUrl = null
+      // Handle file upload if a file is selected
+      let evidenceUrl = null
+      const evidenceFile = (form.elements.namedItem('evidence') as HTMLInputElement)?.files?.[0]
+      
+      if (evidenceFile) {
+        try {
+          const uploadFormData = new FormData()
+          uploadFormData.append('file', evidenceFile)
+          
+          const uploadResponse = await fetch('/api/upload?type=evidence', {
+            method: 'POST',
+            body: uploadFormData,
+            credentials: 'include'
+          })
+          
+          if (uploadResponse.ok) {
+            const uploadResult = await uploadResponse.json()
+            evidenceUrl = uploadResult.url
+          } else {
+            throw new Error('File upload failed')
+          }
+        } catch (uploadError) {
+          console.error('File upload error:', uploadError)
+          toast({
+            title: "File upload failed",
+            description: "Your complaint will be submitted without the evidence file.",
+            variant: "destructive",
+          })
+        }
+      }
 
-      // Remove the evidence file from formData and add the GCS URL instead
+      // Remove the evidence file from formData and add the URL instead
       formData.delete("evidence")
       if (evidenceUrl) {
         formData.append("evidenceUrl", evidenceUrl)
@@ -575,18 +603,29 @@ export default function SubmitComplaint() {
                       <Label htmlFor="evidence" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         Supporting Evidence
                       </Label>
-                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center bg-gray-50 dark:bg-gray-800/30">
-                        <Upload className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2 opacity-50" />
-                        <div className="text-center">
-                          <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                            File Upload Not Available for Now
-                          </span>
-                          <br />
-                          <span className="text-xs text-gray-400 dark:text-gray-500">
-                            Stay tuned for this feature
-                          </span>
-                        </div>
+                      <div className="relative">
+                        <input
+                          id="evidence"
+                          name="evidence"
+                          type="file"
+                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                          onChange={handleFileChange}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 dark:file:bg-purple-900/20 dark:file:text-purple-400 dark:hover:file:bg-purple-900/30 bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-purple-500 focus:ring-purple-500/20"
+                        />
+                        {filePreview && (
+                          <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                            <div className="flex items-center">
+                              <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mr-2" />
+                              <span className="text-sm font-medium text-green-800 dark:text-green-300">
+                                {filePreview.name}
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Upload documents, images, or other files that support your complaint (PDF, DOC, DOCX, JPG, PNG, GIF - Max 10MB)
+                      </p>
                       {state.errors?.evidenceFile && (
                         <p className="text-sm text-red-500 dark:text-red-400 flex items-center">
                           <AlertCircle className="w-4 h-4 mr-1" />
