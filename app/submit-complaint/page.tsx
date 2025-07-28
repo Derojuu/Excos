@@ -110,9 +110,10 @@ export default function SubmitComplaint() {
           }
         } catch (uploadError) {
           console.error('File upload error:', uploadError)
+          const errorMessage = uploadError instanceof Error ? uploadError.message : 'Unknown error occurred'
           toast({
             title: "File upload failed",
-            description: `Error: ${uploadError.message}. Your complaint will be submitted without the evidence file.`,
+            description: `Error: ${errorMessage}. Your complaint will be submitted without the evidence file.`,
             variant: "destructive",
           })
         }
