@@ -104,13 +104,15 @@ export default function SubmitComplaint() {
             const uploadResult = await uploadResponse.json()
             evidenceUrl = uploadResult.url
           } else {
-            throw new Error('File upload failed')
+            const errorData = await uploadResponse.json()
+            console.error('Upload response error:', errorData)
+            throw new Error(errorData.message || 'File upload failed')
           }
         } catch (uploadError) {
           console.error('File upload error:', uploadError)
           toast({
             title: "File upload failed",
-            description: "Your complaint will be submitted without the evidence file.",
+            description: `Error: ${uploadError.message}. Your complaint will be submitted without the evidence file.`,
             variant: "destructive",
           })
         }

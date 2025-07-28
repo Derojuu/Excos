@@ -29,6 +29,9 @@ export default async function handler(
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, message: 'Method not allowed' })
   }
+  
+  console.log('Upload API called with type:', req.query.type)
+  
   try {
     // Check authentication using the helper function
     const session = getSessionFromRequest(req)
@@ -54,9 +57,7 @@ export default async function handler(
       uploadDir: tempDir,
       keepExtensions: true,
       maxFileSize: 10 * 1024 * 1024, // 10MB limit
-    })
-
-    // Define allowed file types
+    })    // Define allowed file types
     const allowedFileTypes = type === 'profile' 
       ? ['.jpg', '.jpeg', '.png', '.gif']
       : ['.jpg', '.jpeg', '.png', '.pdf', '.doc', '.docx']
@@ -65,13 +66,9 @@ export default async function handler(
       const ext = path.extname(file.originalFilename || '').toLowerCase()
       
       if (!allowedFileTypes.includes(ext)) {
-        return res.status(400).json({ 
-          success: false, 
-          message: `Invalid file type. Allowed types: ${allowedFileTypes.join(', ')}` 
-        })
-      }
-
-      // Generate unique filename for temp storage
+        console.error(`Invalid file type: ${ext}. Allowed types: ${allowedFileTypes.join(', ')}`)
+        return
+      }      // Generate unique filename for temp storage
       const timestamp = Date.now()
       const userId = session.userId
       const filename = `temp-${userId}-${timestamp}-${file.originalFilename}`
@@ -84,21 +81,45 @@ export default async function handler(
         return res.status(400).json({ success: false, message: err.message })
       }
 
+      console.log('Files received:', Object.keys(files))
+      console.log('Fields received:', Object.keys(fields))
+
       const file = Array.isArray(files.file) ? files.file[0] : files.file
 
       if (!file) {
+        console.log('No file found in upload')
         return res.status(400).json({ success: false, message: 'No file uploaded' })
+      }
+
+      console.log('File details:', {
+        originalFilename: file.originalFilename,
+        size: file.size,
+        mimetype: file.mimetype,
+        filepath: file.filepath
+      })
+
+      // Validate file type again
+      const ext = path.extname(file.originalFilename || '').toLowerCase()
+      if (!allowedFileTypes.includes(ext)) {
+        console.log(`File type validation failed: ${ext}`)
+        return res.status(400).json({ 
+          success: false, 
+          message: `Invalid file type: ${ext}. Allowed types: ${allowedFileTypes.join(', ')}` 
+        })
       }
 
       try {
         // Verify file was uploaded successfully
         if (!fs.existsSync(file.filepath)) {
-          return res.status(500).json({ success: false, message: 'File upload failed' })
-        }        // Generate unique filename for Cloudinary
+          return res.status(500).json({ success: false, message: 'File upload failed' })        }
+        
+        // Generate unique filename for Cloudinary
         const timestamp = Date.now()
         const userId = session.userId
         const ext = path.extname(file.originalFilename || '')
-        const folder = type === 'profile' ? 'profile-pics' : 'evidence'        // Read the file buffer
+        const folder = type === 'profile' ? 'profile-pics' : 'evidence'
+        
+        // Read the file buffer
         const fileBuffer = fs.readFileSync(file.filepath)
 
         try {
@@ -118,13 +139,16 @@ export default async function handler(
             message: 'File uploaded successfully'
           })
 
-        } catch (uploadError) {
+        } catch (uploadError: any) {
           console.error('Cloudinary upload error:', uploadError)
           // Clean up temp file
           if (fs.existsSync(file.filepath)) {
             fs.unlinkSync(file.filepath)
           }
-          return res.status(500).json({ success: false, message: 'Failed to upload to Cloudinary' })
+          return res.status(500).json({ 
+            success: false, 
+            message: `Failed to upload to Cloudinary: ${uploadError.message || uploadError}` 
+          })
         }
 
       } catch (error) {
