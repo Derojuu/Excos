@@ -280,7 +280,7 @@ export default function ComplaintDetail() {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200/20 dark:bg-blue-800/10 rounded-full opacity-40 animate-pulse delay-1000"></div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -332,7 +332,7 @@ export default function ComplaintDetail() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
-              <Card className="glass-effect border-0 shadow-xl">
+              <Card className="glass-effect border-0 shadow-xl overflow-hidden">
                 <CardHeader className="border-b border-white/20 dark:border-gray-700/20 bg-gradient-to-r from-white/50 to-white/30 dark:from-gray-800/50 dark:to-gray-800/30">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="space-y-2">
@@ -353,11 +353,10 @@ export default function ComplaintDetail() {
                           : "N/A"}
                       </CardDescription>
                     </div>
-
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <div className="flex items-center gap-3">
                       {getStatusBadge(status)}
                       <Select value={status} onValueChange={handleUpdateStatus}>
-                        <SelectTrigger className="w-full sm:w-[180px] h-10 bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
+                        <SelectTrigger className="w-[180px] h-10 bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
                           <SelectValue placeholder="Update Status" />
                         </SelectTrigger>
                         <SelectContent>
@@ -375,11 +374,10 @@ export default function ComplaintDetail() {
                     {/* Student Information */}
                     <div className="space-y-4">
                       <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                        <User className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                        <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         Student Information
                       </h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {/* Student Name */}
                         <div className="flex items-start gap-3 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
                           <User className="h-5 w-5 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
                           <div className="min-w-0">
@@ -388,7 +386,6 @@ export default function ComplaintDetail() {
                           </div>
                         </div>
 
-                        {/* Student ID */}
                         <div className="flex items-start gap-3 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
                           <User className="h-5 w-5 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
                           <div className="min-w-0">
@@ -397,11 +394,10 @@ export default function ComplaintDetail() {
                           </div>
                         </div>
 
-                        {/* Contact Information */}
                         <div className="flex items-start gap-3 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
                           <Mail className="h-5 w-5 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Contact Information</p>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</p>
                             <p className="text-gray-900 dark:text-gray-100 break-all">{complaint.email}</p>
                             {complaint.phone && (
                               <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{complaint.phone}</p>
@@ -409,35 +405,12 @@ export default function ComplaintDetail() {
                           </div>
                         </div>
 
-                        {/* Department */}
                         <div className="flex items-start gap-3 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
                           <GraduationCap className="h-5 w-5 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
                           <div className="min-w-0">
                             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Department</p>
                             <p className="text-gray-900 dark:text-gray-100 break-words">
                               {complaint.userDepartment || 'Not specified'}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Level */}
-                        <div className="flex items-start gap-3 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
-                          <Layers className="h-5 w-5 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Level</p>
-                            <p className="text-gray-900 dark:text-gray-100 break-words">
-                              {complaint.level || 'Not specified'}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Faculty */}
-                        <div className="flex items-start gap-3 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
-                          <Building2 className="h-5 w-5 text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Faculty</p>
-                            <p className="text-gray-900 dark:text-gray-100 break-words">
-                              {complaint.userFaculty || 'Not specified'}
                             </p>
                           </div>
                         </div>
