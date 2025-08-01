@@ -511,7 +511,7 @@ export default function ComplaintDetail() {
                           </div>
                         </div>
 
-                        {complaint.evidence && (
+                        {complaint.evidenceFile && (
                           <div>
                             <h4 className="font-medium mb-3 text-gray-900 dark:text-gray-100">Supporting Evidence</h4>
                             <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 p-6 rounded-xl border border-purple-200 dark:border-purple-700">
@@ -519,7 +519,7 @@ export default function ComplaintDetail() {
                                 <div className="flex items-center gap-3">
                                   <FileText className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                                   <div>
-                                    <p className="font-medium text-gray-900 dark:text-gray-100">{complaint.evidence}</p>
+                                    <p className="font-medium text-gray-900 dark:text-gray-100">Evidence File</p>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">Evidence file attached</p>
                                   </div>
                                 </div>
@@ -527,6 +527,7 @@ export default function ComplaintDetail() {
                                   <Button
                                     variant="outline"
                                     size="sm"
+                                    onClick={() => window.open(complaint.evidenceFile, '_blank')}
                                     className="border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
                                   >
                                     <Eye className="w-4 h-4 mr-2" />
@@ -535,6 +536,15 @@ export default function ComplaintDetail() {
                                   <Button
                                     variant="outline"
                                     size="sm"
+                                    onClick={() => {
+                                      const evidenceUrl = complaint.evidenceFile
+                                      if (evidenceUrl) {
+                                        const link = document.createElement('a')
+                                        link.href = evidenceUrl
+                                        link.download = 'evidence-file'
+                                        link.click()
+                                      }
+                                    }}
                                     className="border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
                                   >
                                     <Download className="w-4 h-4 mr-2" />

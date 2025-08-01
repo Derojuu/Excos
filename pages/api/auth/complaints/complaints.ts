@@ -168,9 +168,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(500).json({ message: "Error processing the form." });
         }
 
-        console.log("Authenticated user:", session);
-
-        const validatedFields = {
+        console.log("Authenticated user:", session);        const validatedFields = {
           fullName: fields.fullName ? fields.fullName[0] : '',
           studentId: fields.studentId ? fields.studentId[0] : '',
           email: fields.email ? fields.email[0] : '',
@@ -183,7 +181,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           course: fields.course ? fields.course[0] : '',
           department: fields.department ? fields.department[0] : '',
           faculty: fields.faculty ? fields.faculty[0] : '',
-          evidenceUrl: '', // No file upload for now
+          evidenceUrl: fields.evidenceUrl ? fields.evidenceUrl[0] : '',
         };
 
         const validationResult = ComplaintSchema.safeParse(validatedFields);
@@ -205,8 +203,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           faculty,
           evidenceUrl,        } = validationResult.data;
 
-        // No file upload for now - evidence is disabled
-        const evidenceFile = null;try {
+        // Use the evidenceUrl from the form data (uploaded via separate API)
+        const evidenceFile = evidenceUrl || null;try {
           console.log("Database connected successfully.");
 
           const complaintId = generateId();
