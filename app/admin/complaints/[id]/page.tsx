@@ -487,23 +487,23 @@ export default function ComplaintDetail() {
                         {complaint.evidenceFile && (
                           <div>
                             <h4 className="font-medium mb-3 text-gray-900 dark:text-gray-100">Supporting Evidence</h4>
-                            <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 p-6 rounded-xl border border-purple-200 dark:border-purple-700">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <FileText className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                                  <div>
-                                    <p className="font-medium text-gray-900 dark:text-gray-100">Evidence File</p>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">Evidence file attached</p>
+                            <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 p-4 sm:p-6 rounded-xl border border-purple-200 dark:border-purple-700">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 dark:text-purple-400 flex-shrink-0" />
+                                  <div className="min-w-0">
+                                    <p className="font-medium text-gray-900 dark:text-gray-100 text-sm sm:text-base">Evidence File</p>
+                                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Evidence file attached</p>
                                   </div>
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 w-full sm:w-auto">
                                   <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() => window.open(complaint.evidenceFile, '_blank')}
-                                    className="border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                                    className="border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 flex-1 sm:flex-none text-xs sm:text-sm"
                                   >
-                                    <Eye className="w-4 h-4 mr-2" />
+                                    <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                                     View
                                   </Button>
                                   <Button
@@ -518,9 +518,9 @@ export default function ComplaintDetail() {
                                         link.click()
                                       }
                                     }}
-                                    className="border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                                    className="border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 flex-1 sm:flex-none text-xs sm:text-sm"
                                   >
-                                    <Download className="w-4 h-4 mr-2" />
+                                    <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                                     Download
                                   </Button>
                                 </div>
